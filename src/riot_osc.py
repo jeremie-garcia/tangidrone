@@ -1,5 +1,6 @@
 from oscpy.server import OSCThreadServer
 from time import sleep
+import math as math
 import sys
 
 if __name__ == '__main__':
@@ -33,9 +34,13 @@ if __name__ == '__main__':
         euler_x = args[18]
         euler_y = args[19]
         euler_z = args[20]
+        euler_bonus = args[21]
 
         #signal processing
-        print('temp ' + str(euler_x))
+        phi = math.atan2(2*(quat_x*quat_w+quat_z*quat_z),1-2*(quat_x**2+quat_y**2))
+        phi = (phi*180)/math.pi
+        #print('temp ' + str(phi)+ ' ' + str(euler_x) + ' ' + str(euler_x+phi))
+        print('temp ' + str(euler_bonus))
 
 
     print("testing OSC in python")
@@ -44,7 +49,7 @@ if __name__ == '__main__':
     try :
         sock = osc.listen(address='0.0.0.0', port=8000, default=True)
         osc.bind(b'/0/raw', OSCcallback)
-        sleep(5)
+        sleep(40)
         osc.stop(sock)
         print('stopped OSC')
 
