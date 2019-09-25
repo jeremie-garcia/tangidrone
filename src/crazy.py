@@ -35,6 +35,7 @@ import time
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
+from cflib.crazyflie.log import LogConfig
 
 URI = 'radio://0/80/2M'
 
@@ -48,6 +49,18 @@ if __name__ == '__main__':
     with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
         cf = scf.cf
 
+        lg = LogConfig("Battery", 1000)  # delay
+        lg.add_variable("pm.vbat", "float")
+        #lg.add_variable("pm.state", "int8_t")
+        try:
+            cf.log.add_config(lg)
+            lg.data_received_cb.add_callback(lambda e, f, g: print(e, f, g))
+            lg.error_cb.add_callback(lambda: print('error'))
+            lg.start()
+        except KeyError as e:
+            print(e)
+
+
         cf.param.set_value('kalman.resetEstimation', '1')
         time.sleep(0.1)
         cf.param.set_value('kalman.resetEstimation', '0')
@@ -57,35 +70,37 @@ if __name__ == '__main__':
 
         current_alt = 0
 
-        for y in range(20):
+        for y in range(6):
             current_alt = y / 20
             cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
             time.sleep(delay)
 
-        cf.commander.send_hover_setpoint(-0.3,0,0,current_alt)
+        dist = 0.05 #meters
+
+        cf.commander.send_hover_setpoint(-dist,0,0,current_alt)
         time.sleep(1)
 
-        cf.commander.send_hover_setpoint(0.3, 0, 0, current_alt)
+        cf.commander.send_hover_setpoint(dist, 0, 0, current_alt)
         time.sleep(1)
 
-        cf.commander.send_hover_setpoint(0, 0.3, 0, current_alt)
+        cf.commander.send_hover_setpoint(0, dist, 0, current_alt)
         time.sleep(1)
 
-        cf.commander.send_hover_setpoint(0, -0.3, 0, current_alt)
+        cf.commander.send_hover_setpoint(0, -dist, 0, current_alt)
         time.sleep(1)
 
-        cf.commander.send_hover_setpoint(0, 0, 90, current_alt)
+        cf.commander.send_hover_setpoint(0, 0, 180, current_alt)
         time.sleep(1)
 
-        cf.commander.send_hover_setpoint(0, 0, -90, current_alt)
+        cf.commander.send_hover_setpoint(0, 0, -180, current_alt)
         time.sleep(1)
 
         cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
         time.sleep(2)
 
 
-        for y in range(20):
-            current_alt = (20 - y) / 20
+        for y in range(6):
+            current_alt = (6 - y) / 20
             cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
             print(current_alt)
             time.sleep(delay)
