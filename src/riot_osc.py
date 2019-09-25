@@ -40,7 +40,7 @@ if __name__ == '__main__':
         phi = math.atan2(2*(quat_x*quat_w+quat_z*quat_z),1-2*(quat_x**2+quat_y**2))
         phi = (phi*180)/math.pi
         #print('temp ' + str(phi)+ ' ' + str(euler_x) + ' ' + str(euler_x+phi))
-        print('temp ' + str(euler_bonus))
+        print('temp ' + str(euler_x))
 
 
     print("testing OSC in python")
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     try :
         sock = osc.listen(address='0.0.0.0', port=8000, default=True)
         osc.bind(b'/0/raw', OSCcallback)
-        sleep(40)
+        sleep(20)
         osc.stop(sock)
         print('stopped OSC')
 
