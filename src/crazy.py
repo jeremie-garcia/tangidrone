@@ -73,22 +73,35 @@ if __name__ == '__main__':
         delay = 0.2
         angle = 0
         current_alt = 0
-        cf = motion_commander.MotionCommander(cf,0.05)
-        list = [0]
-        cf.take_off(0.2,0.1)
 
+        cf = motion_commander.MotionCommander(cf,0.05)
+        ancienne_valeur = [0]
+        cf.take_off(0.2,0.1)
+        """
+        for y in range(6):
+            current_alt = y / 20
+            print(current_alt)
+            cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
+            time.sleep(delay)
+        """
         def OSCcallback(*args):
             euler_x = args[18]
             euler_x = round(euler_x)
             if euler_x < 0:
-                euler_x = 360 - euler_x
-            angle = euler_x-list[0]
+                euler_x = 360 + euler_x
+            angle = euler_x - ancienne_valeur[0]
             if angle <= 0:
-                cf.turn_left(abs(angle), 45)
+                cf.turn_left(abs(angle), 90)
             else:
-                cf.turn_right(angle, 45)
-            list[0] = euler_x
-            print(euler_x, list[0])
+                cf.turn_right(angle, 90)
+            print(euler_x, ancienne_valeur[0], angle)
+            ancienne_valeur[0] = euler_x
+            """
+            euler_x = args[18]
+            euler_x = round(euler_x)
+            cf.commander.send_position_setpoint(0,0,current_alt,euler_x)
+            time.sleep(0.5)
+            """
 
         print("testing OSC in python")
         osc = OSCThreadServer()
@@ -96,7 +109,7 @@ if __name__ == '__main__':
         try:
             sock = osc.listen(address='0.0.0.0', port=8000, default=True)
             #osc.bind(b'/0/raw', callback_init)
-            for i in range(25):
+            for i in range(50):
                 osc.bind(b'/0/raw',OSCcallback)
                 time.sleep(0.5)
             osc.stop(sock)
@@ -135,12 +148,10 @@ if __name__ == '__main__':
         cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
         time.sleep(2)
         
-
         for y in range(6):
             current_alt = (6 - y) / 20
             cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
             print(current_alt)
             time.sleep(delay)
         """
-
-        cf.land(0.01)
+        cf.land(0.1)

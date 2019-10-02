@@ -4,7 +4,7 @@ import math as math
 import sys
 
 if __name__ == '__main__':
-
+    list = [0]
     def OSCcallback(*args):
         acc_x = args[0]
         acc_y = args[1]
@@ -36,12 +36,13 @@ if __name__ == '__main__':
         euler_z = args[20]
         euler_bonus = args[21]
 
-        #signal processing
-        phi = math.atan2(2*(quat_x*quat_w+quat_z*quat_z),1-2*(quat_x**2+quat_y**2))
-        phi = (phi*180)/math.pi
-        #print('temp ' + str(phi)+ ' ' + str(euler_x) + ' ' + str(euler_x+phi))
-        print('temp ' + str(euler_x))
-
+        euler_x = args[18]
+        euler_x = round(euler_x)
+        if euler_x < 0:
+            euler_x = 360 + euler_x
+        angle = euler_x - list[0]
+        print(euler_x, list[0], angle)
+        list[0] = euler_x
 
     print("testing OSC in python")
     osc = OSCThreadServer()
@@ -49,7 +50,7 @@ if __name__ == '__main__':
     try :
         sock = osc.listen(address='0.0.0.0', port=8000, default=True)
         osc.bind(b'/0/raw', OSCcallback)
-        sleep(5)
+        sleep(25)
         osc.stop(sock)
         print('stopped OSC')
 
