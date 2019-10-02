@@ -49,7 +49,7 @@ if __name__ == '__main__':
     try :
         sock = osc.listen(address='0.0.0.0', port=8000, default=True)
         osc.bind(b'/0/raw', OSCcallback)
-        sleep(20)
+        sleep(5)
         osc.stop(sock)
         print('stopped OSC')
 
