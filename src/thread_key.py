@@ -22,7 +22,6 @@ t = Thread(target=foo, args=(10,))
 t.start()
 
 def askinput():
-    #change to raw_input for python 2.7
     G.key = keyboard.read_key()
     return 1
 

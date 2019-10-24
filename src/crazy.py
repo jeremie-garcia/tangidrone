@@ -32,15 +32,17 @@ Change the URI variable to your Crazyflie configuration.
 import logging
 import time
 
-from riot_osc_class import *
+import riot_osc_class
 
 from oscpy.server import OSCThreadServer
 
 import cflib.crtp
-from cflib.positioning import motion_commander
+from cflib.positioning.motion_commander import MotionCommander
 from cflib.crazyflie import Crazyflie
 from cflib.crazyflie.log import LogConfig
 from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
+from cflib.utils.multiranger import Multiranger
+
 
 URI = 'radio://0/80/2M'
 
@@ -52,117 +54,29 @@ if __name__ == '__main__':
 
     # Initialize the low-level drivers (don't list the debug drivers)
     cflib.crtp.init_drivers(enable_debug_driver=False)
+    cf=Crazyflie(rw_cache='./cache')
+    with SyncCrazyflie(URI, cf = cf) as scf:
+        with MotionCommander(scf) as motion_commander:
+            with Multiranger(scf) as multiranger:
+                cf = scf.cf
 
-    with SyncCrazyflie(URI, cf=Crazyflie(rw_cache='./cache')) as scf:
-        cf = scf.cf
+                lg = LogConfig("Battery", 1000)  # delay
+                lg.add_variable("pm.vbat", "float")
+                #lg.add_variable("pm.state", "int8_t")
+                try:
+                    cf.log.add_config(lg)
+                    lg.data_received_cb.add_callback(lambda e, f, g: print(e, f, g))
+                    lg.error_cb.add_callback(lambda: print('error'))
+                    lg.start()
+                except KeyError as e:
+                    print(e)
 
-        lg = LogConfig("Battery", 1000)  # delay
-        lg.add_variable("pm.vbat", "float")
-        #lg.add_variable("pm.state", "int8_t")
-        try:
-            cf.log.add_config(lg)
-            lg.data_received_cb.add_callback(lambda e, f, g: print(e, f, g))
-            lg.error_cb.add_callback(lambda: print('error'))
-            lg.start()
-        except KeyError as e:
-            print(e)
-
-        cf.param.set_value('kalman.resetEstimation', '1')
-        time.sleep(0.1)
-        cf.param.set_value('kalman.resetEstimation', '0')
-        time.sleep(2)
-
-        delay = 0.2
-        angle = 0
-        current_alt = 0
-
-        cf = motion_commander.MotionCommander(cf,0.05)
-        ancienne_valeur = [0]
-        cf.take_off(1,0.5)
-
-
-        """
-        for y in range(6):
-            current_alt = y / 20
-            print(current_alt)
-            cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
-            time.sleep(delay)
-        """
-        osc = riot_osc(cf)
-        osc.get_x()
-        osc.stop()
-        """
-        def OSCcallback(*args):
-            euler_x = args[18]
-            euler_x = round(euler_x)
-            if euler_x < 0:
-                euler_x = 360 + euler_x
-            angle = euler_x - ancienne_valeur[0]
-            if abs(angle) >= 1:
-                if angle <= 0:
-                    cf.turn_right(abs(angle), 180)
-                else:
-                    cf.turn_left(abs(angle), 180)
-            cf.turn_right(0,0.1)
-            print(euler_x, ancienne_valeur[0], angle)
-            ancienne_valeur[0] = euler_x
-
-            euler_x = args[18]
-            euler_x = round(euler_x)
-            cf.commander.send_position_setpoint(0,0,current_alt,euler_x)
-            time.sleep(0.5)
-        """
-        """
-        print("testing OSC in python")
-        osc = OSCThreadServer()
-
-        try:
-            sock = osc.listen(address='0.0.0.0', port=8000, default=True)
-            #osc.bind(b'/0/raw', callback_init)
-            for i in range(100):
-                osc.bind(b'/0/raw',OSCcallback)
-                time.sleep(0.5)
-            osc.stop(sock)
-            print('stopped OSC')
-
-        except KeyboardInterrupt:
-            osc.stop_all()
-            print('stopped all for keyboard interupt')
-
-        """
-        """
-        for y in range(6):
-            current_alt = y / 20
-            print(current_alt)
-            cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
-            time.sleep(delay)
-        """
-        dist = 0.05 #meters
-        """ 
-        cf.commander.send_hover_setpoint(-dist,0,0,current_alt)
-        time.sleep(1)
-
-        cf.commander.send_hover_setpoint(dist, 0, 0, current_alt)
-        time.sleep(1)
-
-        cf.commander.send_hover_setpoint(0, dist, 0, current_alt)
-        time.sleep(1)
-
-        cf.commander.send_hover_setpoint(0, -dist, 0, current_alt)
-        time.sleep(1)
-        cf.commander.send_hover_setpoint(0, 0, 180, current_alt)
-        time.sleep(1)
-
-        cf.commander.send_hover_setpoint(0, 0, -180, current_alt)
-        time.sleep(1)
-
-        cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
-        time.sleep(2)
+                cf.param.set_value('kalman.resetEstimation', '1')
+                time.sleep(0.1)
+                cf.param.set_value('kalman.resetEstimation', '0')
+                time.sleep(2)
+                
+                osc = riot_osc_class.riot_osc(multiranger, motion_commander, cf)
+                osc.get_x()
+                osc.stop()
         
-        for y in range(6):
-            current_alt = (6 - y) / 20
-            cf.commander.send_hover_setpoint(0, 0, 0, current_alt)
-            print(current_alt)
-            time.sleep(delay)
-        """
-        cf.land(0.1)

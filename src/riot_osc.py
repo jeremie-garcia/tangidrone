@@ -36,12 +36,13 @@ if __name__ == '__main__':
         euler_z = args[20]
         euler_bonus = args[21]
 
-        euler_x = args[18]
+        euler_x = args[20]
         euler_x = round(euler_x)
         if euler_x < 0:
             euler_x = 360 + euler_x
         angle = euler_x - list[0]
-        print(euler_x, list[0], angle)
+        angle2 = math.atan2(2*(quat_x*quat_w + quat_y*quat_z), 1-2*(quat_z**2+quat_w**2))
+        print(euler_x)
         list[0] = euler_x
 
     print("testing OSC in python")
