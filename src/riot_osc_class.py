@@ -79,14 +79,16 @@ class riot_osc():
             self.callback_x(*args)
         elif abs(self.euler_z - 90) <= 10  and abs(self.euler_y) <= 10:
             self.landing()
-        elif abs(self.euler_z - 270) <= 10 <= 10:
+        elif abs(self.euler_z - 270) <= 10 and abs(self.euler_y) <= 10:
             self.set_velocity(*args)
-        elif abs(self.euler_z - 180) <= 10 and abs(self.euler_y) <= 10:
+        elif abs(self.euler_z - 180) <= 15 and abs(self.euler_y) <= 12:
             self.idle()
         elif abs(self.euler_y - 90) <= 10:
+            print("oui")
             self.callback_z(*args)
-        elif abs(self.euler_y + 90) <= 10:
+        elif abs(self.euler_y + 90) <= 20:
             #peut etre faire un mode de commande manuel, avec le clavier et à terme  la manette
+            #print("manuel")
             self.manual_control()
         else:
             #sleep(0.1)
@@ -99,8 +101,11 @@ class riot_osc():
         self.cf.land(0.2)
         self.keep_flying = False
         """
-        self.keep_flying = False
-        print("Atterrissage...")
+        print("appuyer sur espace quelque seconde pour atterrir et ensuite arrêter le drone")
+        if keyboard.is_pressed("space"):
+            self.keep_flying = False
+            print("Atterrissage...")
+        
 
     def idle(self):
         print("idle...")
@@ -139,7 +144,7 @@ class riot_osc():
                         if self.z < 0.15:
                             self.keep_flying = False
                     else:
-                        self.motion_commander.up(self.angle/360,0.5)
+                        self.motion_commander.up(self.angle/720,0.5)
                         self.z += abs(self.angle)/360
             self.count = 0
             self.angle = 0
@@ -175,13 +180,13 @@ class riot_osc():
 
     def get_x(self):
         self.reader_thread.start()
-        if self.cf != None : self.cf.take_off(self.z,0.5)
+        #if self.cf != None : self.cf.take_off(self.z,0.5)
         try:
             self.sock_connect()
             self.osc.bind(b'/0/raw',self.set_orig)
             sleep(0.02)
             self.osc.unbind(b'/0/raw',self.set_orig)
-            for _ in range(50):
+            while self.keep_flying:
                 self.osc.bind(b'/0/raw',self.callback)
                 sleep(0.5)
         except KeyboardInterrupt:
@@ -231,9 +236,10 @@ class riot_osc():
             sleep(0.1)
 
     def manual_control(self):
-        print("hey")
+        #print("hey")
         velocity_x = 0
         velocity_y = 0
+        velocity_z = 0
         VELOCITY = 0.5
         if keyboard.is_pressed("up"):
             velocity_x += VELOCITY
@@ -243,6 +249,12 @@ class riot_osc():
             velocity_y -= VELOCITY
         if keyboard.is_pressed("right"):
             velocity_y += VELOCITY
+        if keyboard.is_pressed("u"):
+            velocity_z += VELOCITY
+        if keyboard.is_pressed("d"):
+            velocity_z -= VELOCITY
+
         
-        self.motion_commander.start_linear_motion(velocity_x, velocity_y, 0)
-        sleep(0.1)
+        self.motion_commander.start_linear_motion(velocity_x, velocity_y, velocity_z)
+        print("velocity_x = ", velocity_x, " velocity_y = ", velocity_y, " velocity_z = ", velocity_z)
+        #sleep(0.1)

@@ -95,6 +95,7 @@ if __name__ == '__main__':
                         velocity_y += VELOCITY
 
                     if is_close(multiranger.up):
+                        print("CA MARCHE PAS")
                         keep_flying = False
 
                     motion_commander.start_linear_motion(

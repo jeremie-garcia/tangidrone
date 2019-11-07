@@ -46,7 +46,6 @@ from cflib.utils.multiranger import Multiranger
 
 URI = 'radio://0/80/2M'
 
-# Only output errors from the logging framework
 logging.basicConfig(level=logging.ERROR)
 
 if __name__ == '__main__':
@@ -56,7 +55,7 @@ if __name__ == '__main__':
     cflib.crtp.init_drivers(enable_debug_driver=False)
     cf=Crazyflie(rw_cache='./cache')
     with SyncCrazyflie(URI, cf = cf) as scf:
-        with MotionCommander(scf) as motion_commander:
+        with MotionCommander(scf, 0.5) as motion_commander:
             with Multiranger(scf) as multiranger:
                 cf = scf.cf
 
