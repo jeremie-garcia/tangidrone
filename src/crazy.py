@@ -58,10 +58,10 @@ if __name__ == '__main__':
         with MotionCommander(scf, 0.5) as motion_commander:
             with Multiranger(scf) as multiranger:
                 cf = scf.cf
-
                 lg = LogConfig("Battery", 1000)  # delay
                 lg.add_variable("pm.vbat", "float")
                 #lg.add_variable("pm.state", "int8_t")
+                
                 try:
                     cf.log.add_config(lg)
                     lg.data_received_cb.add_callback(lambda e, f, g: print(e, f, g))
@@ -69,12 +69,15 @@ if __name__ == '__main__':
                     lg.start()
                 except KeyError as e:
                     print(e)
+                
 
                 cf.param.set_value('kalman.resetEstimation', '1')
                 time.sleep(0.1)
                 cf.param.set_value('kalman.resetEstimation', '0')
                 time.sleep(2)
                 
+                #tout ce qu'il y a au dessus permet de visualiser la charge de la batterie
+                #à chaque instant 
                 osc = riot_osc_class.riot_osc(multiranger, motion_commander, cf)
                 osc.get_x()
                 osc.stop()
