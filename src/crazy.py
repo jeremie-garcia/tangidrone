@@ -79,6 +79,6 @@ if __name__ == '__main__':
                 #tout ce qu'il y a au dessus permet de visualiser la charge de la batterie
                 #à chaque instant 
                 osc = riot_osc_class.riot_osc(multiranger, motion_commander, cf)
-                osc.get_x()
+                osc.run()
                 osc.stop()
         

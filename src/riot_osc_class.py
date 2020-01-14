@@ -207,7 +207,7 @@ class riot_osc():
         #fonction qui établit la connection avec le capteur au  lancement
         self.sock = self.osc.listen(address='0.0.0.0', port=8000, default=True)
 
-    def get_x(self):
+    def run(self):
         #fonction principale qui établit la position d'origine puis lie la fonction de callback au capteur 
         #et lance une boucle infinie tant que la fonction d'aterrrissage n'est pas lancée
         try:
