@@ -44,6 +44,8 @@ from cflib.crazyflie.syncCrazyflie import SyncCrazyflie
 from cflib.utils.multiranger import Multiranger
 
 
+#main pour lancer le projet
+
 URI = 'radio://0/80/2M'
 
 logging.basicConfig(level=logging.ERROR)

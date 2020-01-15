@@ -1,12 +1,17 @@
 from oscpy.server import OSCThreadServer
 import math
-import key_reader
 import keyboard
 from threading import Thread,Lock
-import dyn_plot_ex
 from time import sleep
 
 class riot_osc():
+    '''classe principale pour le controle du drone par le capteur'''
+    #NOTTODO : fonction atterissage;
+    #TODO : si tous les modes (surtout avec multiranger en même temps - si thread parallel -> probleme?)
+    #todo : orientation fonctionne (lag visible (- une seconde ~250ms)), altitude: pbs pas trop deterministe
+    # vitesses max évitement
+        #bien modifiée en paramètres mais evolution dynamique bizarre, tests multi-ranger pas faits.
+    #cnotrol manuel fonctionne avec clavier directionnel + u et d pour altitude (plutot reactif (comme orientaiton voir moins))
 
     def __init__(self, multiranger, motion_commander, cf = None, to_alt = 0.5, graph = False):
         self.osc = OSCThreadServer()
@@ -54,7 +59,7 @@ class riot_osc():
 
 
     def set_orig(self, *args, axes = "all"):
-        #fonction lancer au début du programme qui récupère les valeurs initiales du capteur pour définir une origine pour la suite 
+        #fonction lancée au début du programme qui récupère les valeurs initiales du capteur pour définir une origine pour la suite
         if axes == "all" or axes == "x": 
             self.orig_x = self._normalize__(args[18],0)
         if axes == "all" or axes == "z": 
@@ -105,7 +110,7 @@ class riot_osc():
         
 
     def landing(self):
-        #fonction d'atterrisage
+        #fonction d'atterrisage, besoin de valider par appui sur espace
         print("appuyer sur espace quelque seconde pour atterrir et ensuite arrêter le drone")
         if keyboard.is_pressed("space"):
             self.keep_flying = False
@@ -258,4 +263,3 @@ class riot_osc():
                 velocity_x, velocity_y, 0)
 
             sleep(0.1)
-

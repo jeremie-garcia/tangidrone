@@ -3,6 +3,7 @@ from time import sleep
 import math as math
 import sys
 
+#''' tester for OSC Riot reception'''
 if __name__ == '__main__':
     list = [0]
     def OSCcallback(*args):
